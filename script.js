@@ -23,13 +23,34 @@ fetch('english_expressions_b1_words.csv')
     });
 
 function startQuiz() {
-    unseenIndices = Array.from({ length: words.length }, (_, i) => i);
-    incorrectIndices = [];
-    isReviewMode = false;
+    loadProgress();
+    if (unseenIndices.length === 0 && incorrectIndices.length === 0) {
+        unseenIndices = Array.from({ length: words.length }, (_, i) => i);
+    }
     nextQuestion();
 }
 
+function saveProgress() {
+    const progress = {
+        unseenIndices,
+        incorrectIndices,
+        isReviewMode
+    };
+    document.cookie = `progress=${JSON.stringify(progress)};max-age=31536000`;
+}
+
+function loadProgress() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('progress='));
+    if (cookie) {
+        const progress = JSON.parse(cookie.split('=')[1]);
+        unseenIndices = progress.unseenIndices;
+        incorrectIndices = progress.incorrectIndices;
+        isReviewMode = progress.isReviewMode;
+    }
+}
+
 function nextQuestion() {
+    saveProgress();
     feedbackText.textContent = '';
     if (isReviewMode) {
         if (incorrectIndices.length === 0) {
@@ -51,7 +72,7 @@ function nextQuestion() {
 
     const correctAnswer = currentWord.japanese;
     const options = [correctAnswer];
-    while (options.length < 4) {
+    while (options.length < 8) {
         const randomWord = words[Math.floor(Math.random() * words.length)];
         if (!options.includes(randomWord.japanese)) {
             options.push(randomWord.japanese);
@@ -83,7 +104,7 @@ function checkAnswer(selectedAnswer, correctAnswer) {
 function updateProgress() {
     const total = isReviewMode ? incorrectIndices.length + 1 : words.length;
     const remaining = isReviewMode ? incorrectIndices.length : unseenIndices.length;
-    progressText.textContent = `進捗況: ${total - remaining} / ${total}`;
+    progressText.textContent = `進捗状況: ${total - remaining} / ${total}`;
 }
 
 reviewModeBtn.addEventListener('click', () => {
