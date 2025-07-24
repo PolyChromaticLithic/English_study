@@ -3,7 +3,10 @@ const optionBtns = document.querySelectorAll('.option-btn');
 const feedbackText = document.getElementById('feedback-text');
 const progressText = document.getElementById('progress-text');
 const reviewModeBtn = document.getElementById('review-mode-btn');
+const nextQuestionBtn = document.getElementById('next-question-btn');
 const completionContainer = document.getElementById('completion-container');
+
+nextQuestionBtn.addEventListener('click', nextQuestion);
 
 let words = [];
 let unseenIndices = [];
@@ -52,6 +55,8 @@ function loadProgress() {
 function nextQuestion() {
     saveProgress();
     feedbackText.textContent = '';
+    nextQuestionBtn.style.display = 'none';
+    optionBtns.forEach(btn => btn.disabled = false);
     if (isReviewMode) {
         if (incorrectIndices.length === 0) {
             completionContainer.style.display = 'block';
@@ -98,7 +103,8 @@ function checkAnswer(selectedAnswer, correctAnswer) {
             incorrectIndices.push(currentQuestionIndex);
         }
     }
-    setTimeout(nextQuestion, 2000);
+    optionBtns.forEach(btn => btn.disabled = true);
+    nextQuestionBtn.style.display = 'block';
 }
 
 function updateProgress() {
